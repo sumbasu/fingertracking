@@ -9,11 +9,11 @@ import random
 pTime = 0
 dTime = 0
 
-cIndex = 0
-ndexFlag = False
-cMid = 0
-cRing = 0 
-cPinly = 0
+fingers = 5
+
+touchCount = [0 for col in range(fingers)] 
+fingerFoldCount = [0 for col in range(fingers)] 
+newIndexFlag=[True for col in range(fingers)] 
 
 indexFlag = True
 
@@ -28,7 +28,18 @@ pFolded = 0
 isPinkyFolded = False
     
 wCam = 800
-hCam = 640 
+hCam = 640
+
+fingers = 5
+knuckles = 4
+range_start=1
+span=4
+    
+finger_points=[]
+finger_tip_circles=[]
+finger_tip_distance=[]
+#finger_knuckles=[]
+#knuckle_coordinates=[]
 ###############################################################################
 
 def distanceCalculate(p1, p2):
@@ -42,36 +53,19 @@ def drawFingerTipCircles (p,frame):
 
 def putTextonScreen (frame,fps):
     cv2.putText (frame, f'FPS : {int(fps)}', (40,70), cv2.FONT_HERSHEY_COMPLEX,1,(255,0,0),3 )
-    cv2.putText (frame, f'Pinky Touched to Thumb: {int(cIndex)}', (40,110), cv2.FONT_HERSHEY_COMPLEX,1,(255,0,0),3 )
-    cv2.putText (frame, f'Pinky Folded: {int(pFolded)}', (40,150), cv2.FONT_HERSHEY_COMPLEX,1,(255,0,0),3 )
-    cv2.putText (frame, f'Index Touched Circle: {int(touched)}', (40,190), cv2.FONT_HERSHEY_COMPLEX,1,(255,0,0),3 )
+    cv2.putText (frame, f'Pinky Touched to Thumb: {int(touchCount[4])}', (40,110), cv2.FONT_HERSHEY_COMPLEX,1,(255,0,0),3 )
+    cv2.putText (frame, f'Ring Touched to Thumb: {int(touchCount[3])}', (40,150), cv2.FONT_HERSHEY_COMPLEX,1,(255,0,0),3 )
+    cv2.putText (frame, f'Middle Touched to Thumb: {int(touchCount[2])}', (40,190), cv2.FONT_HERSHEY_COMPLEX,1,(255,0,0),3 )
+    cv2.putText (frame, f'Index Touched to Thumb: {int(touchCount[1])}', (40,230), cv2.FONT_HERSHEY_COMPLEX,1,(255,0,0),3 )
+    #cv2.putText (frame, f'Pinky Folded: {int(pFolded)}', (40,270), cv2.FONT_HERSHEY_COMPLEX,1,(255,0,0),3 )
+    cv2.putText (frame, f'Index Touched Circle: {int(touched)}', (40,310), cv2.FONT_HERSHEY_COMPLEX,1,(255,0,0),3 )
 
 #def drawCircle (int x,int y,cv2 cv, ):
 
 
-def drawFoldedFingers(frame,mp_hands,hand_landmarks):
-
+#def drawFoldedFingers(frame,mp_hands,hand_landmarks):
+def drawFoldedFingers(frame):
     frame_height, frame_width, _ = frame.shape
-    fingers = 5
-    knuckles = 4
-    range_start=1
-    span=4
-    
-    finger_points=[]
-
-    # Build 3D array : fingers x knuckles x knuckle_coordinators i.e a 5x4x2 array
-    # knuckle indices follow a predefined enumeration as defined in https://developers.google.com/mediapipe/solutions/vision/hand_landmarker
-    # 0 is represented as wrist, and hence the range_start value starts from 1 to represent first_joint of thumb, whereas 20 is the index for Pinky finger tip
-    
-    for x in range (fingers):
-        finger_knuckles = []
-        for y in range (range_start,range_start+span):
-            knuckle_coordinates = []
-            knuckle_coordinates.append(int (hand_landmarks.landmark[y].x * frame_width))
-            knuckle_coordinates.append(int (hand_landmarks.landmark[y].y * frame_height))
-            finger_knuckles.append(knuckle_coordinates)
-        range_start += span
-        finger_points.append(finger_knuckles)
 
 
     #Connect knuckles by line
@@ -90,6 +84,17 @@ def drawTrackedFingers(frame,mp_hands,hand_landmarks):
     global cIndex
     global target_object_x
     global target_object_y
+    global fingers
+    global knuckles
+    global range_start
+    global span
+    global finger_points
+    global finger_tip_circles
+    global finger_tip_distance
+    global newIndexFlag
+    global touchCount
+  
+    
 
     frame_height, frame_width, _ = frame.shape
 
@@ -97,69 +102,62 @@ def drawTrackedFingers(frame,mp_hands,hand_landmarks):
         target_object_x = random.randint(1, frame_width)
         target_object_y = random.randint(1, frame_height)
         indexCircleAppearance = True
-    
-    index_finger_x = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x
-    index_finger_y = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y
-            
-    circle1_x = int (index_finger_x * frame_width)
-    circle1_y = int (index_finger_y * frame_height)
-            
-    if((abs(target_object_x-circle1_x) < 8) and (abs (target_object_y - circle1_y) < 8)):
-        cv2.circle(frame,center = (target_object_x,target_object_y), radius = 24 , color = (0,255,0), thickness = 25)
-        indexCircleAppearance = False
-        touched += 1
-                
-    drawFingerTipCircles ((circle1_x,circle1_y),frame)
-               
-    middle_finger_x = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP].x
-    middle_finger_y = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP].y
-            
-    circle1_x = int (middle_finger_x * frame_width)
-    circle1_y = int (middle_finger_y * frame_height)
-                
-    drawFingerTipCircles ((circle1_x,circle1_y),frame)
-            
-    ring_finger_x = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_TIP].x
-    ring_finger_y = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_TIP].y
-            
-    circle1_x = int (ring_finger_x * frame_width)
-    circle1_y = int (ring_finger_y * frame_height)
-                
-    drawFingerTipCircles ((circle1_x,circle1_y),frame)
-    
-            
-    pinky_finger_x = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP].x
-    pinky_finger_y = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP].y
-            
-            
-    circle1_x = int (pinky_finger_x * frame_width)
-    circle1_y = int (pinky_finger_y * frame_height)
-                
-    drawFingerTipCircles ((circle1_x,circle1_y),frame)
-            
-    thumb_x = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].x
-    thumb_y = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].y
-            
-    circle2_x = int (thumb_x * frame_width)
-    circle2_y = int (thumb_y * frame_height)
 
-    drawFingerTipCircles ((circle2_x,circle2_y),frame)
+    for x in range (fingers):
+        finger_knuckles = []
+        for y in range (range_start, range_start+ span):
+            knuckle_coordinates = []
+            knuckle_coordinates.append(int (hand_landmarks.landmark[y].x * frame_width))
+            knuckle_coordinates.append(int (hand_landmarks.landmark[y].y * frame_height))
+            finger_knuckles.append(knuckle_coordinates)
+        range_start +=  span
+        finger_points.append(finger_knuckles)
+
+    for j in range(fingers):
+       circle_coordinates=[]
+       circle_coordinates.append(int (finger_points[j][3][0])) # x coordinate of the tip of the specific finger
+       circle_coordinates.append(int (finger_points[j][3][1])) # y coordinate of the tip of the specific finger
+    
+       drawFingerTipCircles ((circle_coordinates[0],circle_coordinates[1]),frame) # draw small circle around tip of the finger
+       
+       finger_tip_circles.append(circle_coordinates) # append x, y coordinates of finger tip in fingertip array
+       
+       if ( j == 1 ): ## for index finger
+           if((abs(target_object_x-circle_coordinates[0]) < 8) and (abs (target_object_y - circle_coordinates[1]) < 8)):
+               cv2.circle(frame,center = (target_object_x,target_object_y), radius = 24 , color = (0,255,0), thickness = 25)
+               indexCircleAppearance = False
+               touched += 1
+            
+
+    for j in range(fingers):
+        circle1_x = finger_tip_circles[j][0]
+        circle1_y = finger_tip_circles[j][1]
+        circle2_x = finger_tip_circles[0][0]  ## this is thumb's tip's x coordinate
+        circle2_y = finger_tip_circles[0][1] ## this is thumb's tip's y coordinate 
+        finger_tip_distance.append(distanceCalculate ((circle1_x,circle1_y),(circle2_x,circle2_y)))
+    
 
     ## calculate distance between any finger tip to thumb finger tip
-                
-    disI = distanceCalculate ((circle1_x,circle1_y),(circle2_x,circle2_y))
-            
 
-    #print (str(int(disI)))
+ 
             
-    if ((disI < 60) and (indexFlag == False) ) :
-        cIndex += 1
-        indexFlag = True
-            
-    if ((disI > 80) and (indexFlag == True) ) :
-        indexFlag = False
+    disI = finger_tip_distance[4]
+    for j in range (fingers):
+        disI = finger_tip_distance[j]
+        if ((disI < 60) and (newIndexFlag[j] == False) ) :
+            touchCount[j] += 1
+            newIndexFlag[j] = True
+        if ((disI > 80) and (newIndexFlag[j] == True) ) :
+            newIndexFlag[j] = False
 
-    drawFoldedFingers(frame,mp_hands,hand_landmarks)
+    #drawFoldedFingers(frame,mp_hands,hand_landmark)
+    drawFoldedFingers(frame)
+
+    
+    finger_points.clear()
+    finger_tip_circles.clear()
+    finger_tip_distance.clear()
+    range_start = 1
     
     
 #def removeCircle()
