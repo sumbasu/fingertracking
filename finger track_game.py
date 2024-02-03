@@ -59,7 +59,7 @@ def drawFoldedFingers(frame,mp_hands,hand_landmarks):
     
     finger_points=[]
 
-    # Build 3D array fingers x knuckles x knuckle_coordinators
+    # Build 3D array : fingers x knuckles x knuckle_coordinators i.e a 5x4x2 array
     # knuckle indices follow a predefined enumeration as defined in https://developers.google.com/mediapipe/solutions/vision/hand_landmarker
     # 0 is represented as wrist, and hence the range_start value starts from 1 to represent first_joint of thumb, whereas 20 is the index for Pinky finger tip
     
