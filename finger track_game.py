@@ -9,9 +9,10 @@ import random
 pTime = 0
 dTime = 0
 
+
 fingers = 5
 
-touchCount = [0 for col in range(fingers)] 
+touchCount = [0 for col in range(fingers)]
 fingerFoldCount = [0 for col in range(fingers)] 
 newIndexFlag=[True for col in range(fingers)] 
 
@@ -58,7 +59,7 @@ def putTextonScreen (frame,fps):
     cv2.putText (frame, f'Middle Touched to Thumb: {int(touchCount[2])}', (40,190), cv2.FONT_HERSHEY_COMPLEX,1,(255,0,0),3 )
     cv2.putText (frame, f'Index Touched to Thumb: {int(touchCount[1])}', (40,230), cv2.FONT_HERSHEY_COMPLEX,1,(255,0,0),3 )
     #cv2.putText (frame, f'Pinky Folded: {int(pFolded)}', (40,270), cv2.FONT_HERSHEY_COMPLEX,1,(255,0,0),3 )
-    cv2.putText (frame, f'Index Touched Circle: {int(touched)}', (40,310), cv2.FONT_HERSHEY_COMPLEX,1,(255,0,0),3 )
+    cv2.putText (frame, f'Index Touched Circle: {int(touched)}', (40,310), cv2.FONT_HERSHEY_COMPLEX,1,(255,240,0),3 )
 
 #def drawCircle (int x,int y,cv2 cv, ):
 
@@ -99,8 +100,8 @@ def drawTrackedFingers(frame,mp_hands,hand_landmarks):
     frame_height, frame_width, _ = frame.shape
 
     if (indexCircleAppearance == False):
-        target_object_x = random.randint(1, frame_width)
-        target_object_y = random.randint(1, frame_height)
+        target_object_x = random.randint(400, frame_width-100)
+        target_object_y = random.randint(30, frame_height-200)
         indexCircleAppearance = True
 
     for x in range (fingers):
@@ -210,7 +211,7 @@ def main():
                 mp_drawing.draw_landmarks(frame, hand_landmarks,mp_hands.HAND_CONNECTIONS)
                 drawTrackedFingers (frame,mp_hands,hand_landmarks)
 
-        cv2.imshow('Hand Gesture',frame )
+        cv2.imshow('Finger exercise through gamification',frame )
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
      
